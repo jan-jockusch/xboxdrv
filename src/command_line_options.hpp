@@ -64,6 +64,7 @@ private:
   void set_buttonmap(const std::string& name, const std::string& value);
 
   void set_relative_axis(const std::string& name, const std::string& value);
+  void set_minmax_axis(const std::string& name, const std::string& value);
   void set_autofire(const std::string& name, const std::string& value);
   void set_calibration(const std::string& name, const std::string& value);
   void set_axis_sensitivity(const std::string& name, const std::string& value);
@@ -77,6 +78,7 @@ private:
   void set_buttonmap_n(int controller, int config, const std::string& name, const std::string& value);
 
   void set_relative_axis_n(int controller, int config, const std::string& name, const std::string& value);
+  void set_minmax_axis_n(int controller, int config, const std::string& name, const std::string& value);
   void set_autofire_n(int controller, int config, const std::string& name, const std::string& value);
   void set_calibration_n(int controller, int config, const std::string& name, const std::string& value);
   void set_axis_sensitivity_n(int controller, int config, const std::string& name, const std::string& value);

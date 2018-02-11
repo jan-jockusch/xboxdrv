@@ -199,6 +199,19 @@ ControllerSlotConfig::create_modifier(const ControllerOptions& opts, std::vector
     modifier->push_back(axismap);
   }
 
+  if (!opts.minmax_axis_map.empty())
+  {
+    boost::shared_ptr<AxismapModifier> axismap(new AxismapModifier);
+
+    for(std::map<XboxAxis, AxisFilterPtr>::const_iterator i = opts.minmax_axis_map.begin();
+        i != opts.minmax_axis_map.end(); ++i)
+    {
+      axismap->add_filter(i->first, i->second);
+    }
+
+    modifier->push_back(axismap);
+  }
+
   if (opts.dpad_rotation)
   {
     modifier->push_back(ModifierPtr(new DpadRotationModifier(opts.dpad_rotation)));

@@ -48,6 +48,7 @@ public:
   std::map<XboxAxis, AxisFilterPtr> calibration_map;
   std::map<XboxAxis, AxisFilterPtr> sensitivity_map;
   std::map<XboxAxis, AxisFilterPtr> relative_axis_map;
+  std::map<XboxAxis, AxisFilterPtr> minmax_axis_map;
   std::map<XboxButton, ButtonFilterPtr> autofire_map;
 };
 

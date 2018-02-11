@@ -27,6 +27,7 @@
 #include "axisfilter/invert_axis_filter.hpp"
 #include "axisfilter/log_axis_filter.hpp"
 #include "axisfilter/relative_axis_filter.hpp"
+#include "axisfilter/minmax_axis_filter.hpp"
 #include "axisfilter/response_curve_axis_filter.hpp"
 #include "axisfilter/sensitivity_axis_filter.hpp"
 
@@ -63,6 +64,10 @@ AxisFilter::from_string(const std::string& str)
   else if (filtername == "relative" || filtername == "rel")
   {
     return AxisFilterPtr(RelativeAxisFilter::from_string(rest));
+  }
+  else if (filtername == "minmax")
+  {
+    return AxisFilterPtr(MinmaxAxisFilter::from_string(rest));
   }
   else if (filtername == "resp" || filtername == "response" || filtername == "responsecurve")
   {

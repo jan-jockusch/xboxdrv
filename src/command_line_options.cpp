@@ -34,6 +34,7 @@
 #include "ui_event.hpp"
 
 #include "axisfilter/relative_axis_filter.hpp"
+#include "axisfilter/minmax_axis_filter.hpp"
 #include "axisfilter/calibration_axis_filter.hpp"
 #include "axisfilter/sensitivity_axis_filter.hpp"
 #include "buttonfilter/autofire_button_filter.hpp"
@@ -93,6 +94,7 @@ enum {
   OPTION_AUTOFIRE,
   OPTION_CALIBRARIOTION,
   OPTION_RELATIVE_AXIS,
+  OPTION_MINMAX_AXIS,
   OPTION_SQUARE_AXIS,
   OPTION_FOUR_WAY_RESTRICTOR,
   OPTION_DPAD_ROTATION,
@@ -271,6 +273,7 @@ CommandLineParser::init_argp()
     .add_option(OPTION_DPAD_ROTATION,      0, "dpad-rotation",    "DEGREE", "Rotate the dpad by the given DEGREE, must be a multiple of 45")
     .add_option(OPTION_FOUR_WAY_RESTRICTOR,0, "four-way-restrictor", "",  "Restrict axis movement to one axis at a time")
     .add_option(OPTION_RELATIVE_AXIS,      0, "relative-axis",    "MAP",  "Make an axis emulate a joystick throttle (example: y2=64000)")
+    .add_option(OPTION_MINMAX_AXIS,      0, "minmax-axis",    "MAP",  "Make an axis emulate a joystick throttle in minmax mode (example: y2=0)")
     .add_option(OPTION_SQUARE_AXIS,        0, "square-axis",       "",     "Cause the diagonals to be reported as (1,1) instead of (0.7, 0.7)")
     .add_newline()
 
@@ -303,6 +306,7 @@ CommandLineParser::init_argp()
     .add_pseudo("  sen, sensitivity:SENSITIVITY", "Set the axis sensitivity")
     .add_pseudo("  dead:VALUE, dead:MIN:CENTER:MAX", "Set the axis deadzone")
     .add_pseudo("  rel, relative:SPEED", "Turn axis into a relative-axis")
+    .add_pseudo("  minmax:SPEED", "Turn axis into a minmax-axis. Speed has no meaning.")
     .add_pseudo("  resp, response:VALUES:...", "Set values of the response curve")
     .add_pseudo("  log:STRING", "Print axis value to stdout")
     .add_newline()
@@ -413,6 +417,7 @@ CommandLineParser::init_ini(Options* opts)
 
   m_ini.section("autofire",   boost::bind(&CommandLineParser::set_autofire, this, _1, _2));
   m_ini.section("relative-axis",   boost::bind(&CommandLineParser::set_relative_axis, this, _1, _2));
+  m_ini.section("minmax-axis",   boost::bind(&CommandLineParser::set_minmax_axis, this, _1, _2));
   m_ini.section("calibration",   boost::bind(&CommandLineParser::set_calibration, this, _1, _2));
   m_ini.section("axis-sensitivity",   boost::bind(&CommandLineParser::set_axis_sensitivity, this, _1, _2));
   m_ini.section("device-name", boost::bind(&CommandLineParser::set_device_name, this, _1, _2));
@@ -438,6 +443,8 @@ CommandLineParser::init_ini(Options* opts)
                     boost::bind(&CommandLineParser::set_autofire_n, this, controller, config, _1, _2));
       m_ini.section((boost::format("controller%d/config%d/relative-axis") % controller % config).str(),
                     boost::bind(&CommandLineParser::set_relative_axis_n, this, controller, config, _1, _2));
+      m_ini.section((boost::format("controller%d/config%d/minmax-axis") % controller % config).str(),
+                    boost::bind(&CommandLineParser::set_minmax_axis_n, this, controller, config, _1, _2));
       m_ini.section((boost::format("controller%d/config%d/calibration") % controller % config).str(),
                     boost::bind(&CommandLineParser::set_calibration_n, this, controller, config, _1, _2));
       m_ini.section((boost::format("controller%d/config%d/axis-sensitivity") % controller % config).str(),
@@ -863,6 +870,10 @@ CommandLineParser::apply_opt(ArgParser::ParsedOption const& opt, Options& opts)
       process_name_value_string(opt.argument, boost::bind(&CommandLineParser::set_relative_axis, this, _1, _2));
       break;
 
+    case OPTION_MINMAX_AXIS:
+      process_name_value_string(opt.argument, boost::bind(&CommandLineParser::set_minmax_axis, this, _1, _2));
+      break;
+
     case OPTION_AXIS_SENSITIVITY:
       process_name_value_string(opt.argument, boost::bind(&CommandLineParser::set_axis_sensitivity, this, _1, _2));
       break;
@@ -1247,6 +1258,13 @@ CommandLineParser::set_relative_axis(const std::string& name, const std::string&
 }
 
 void
+CommandLineParser::set_minmax_axis(const std::string& name, const std::string& value)
+{
+  m_options->get_controller_options().minmax_axis_map[string2axis(name)]
+    = AxisFilterPtr(new MinmaxAxisFilter(str2int(value)));
+}
+
+void
 CommandLineParser::set_autofire(const std::string& name, const std::string& value)
 {
   m_options->get_controller_options().autofire_map[string2btn(name)]
@@ -1404,6 +1422,13 @@ CommandLineParser::set_relative_axis_n(int controller, int config, const std::st
 {
   m_options->controller_slots[controller].get_options(config)
     .relative_axis_map[string2axis(name)] = AxisFilterPtr(new RelativeAxisFilter(str2int(value)));
+}
+
+void
+CommandLineParser::set_minmax_axis_n(int controller, int config, const std::string& name, const std::string& value)
+{
+  m_options->controller_slots[controller].get_options(config)
+    .minmax_axis_map[string2axis(name)] = AxisFilterPtr(new MinmaxAxisFilter(str2int(value)));
 }
 
 void

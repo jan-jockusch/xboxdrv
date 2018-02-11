@@ -16,25 +16,35 @@
 **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "controller_options.hpp"
+// JJ Notes: This is nicked from relative_axis_filter.  Therefore,
+// some unnecessary things are still here to make patching easier. See
+// notes below.
 
-ControllerOptions::ControllerOptions() :
-  uinput(),
-  modifier(),
-  buttonmap(new ButtonmapModifier),
-  axismap(new AxismapModifier),
-  deadzone(0),
-  deadzone_trigger(0),
-  square_axis(false),
-  four_way_restrictor(0),
-  dpad_rotation(0),
+#ifndef HEADER_XBOXDRV_AXISFILTER_MINMAX_AXIS_FILTER_HPP
+#define HEADER_XBOXDRV_AXISFILTER_MINMAX_AXIS_FILTER_HPP
 
-  calibration_map(),
-  sensitivity_map(),
-  relative_axis_map(),
-  minmax_axis_map(),
-  autofire_map()
+#include "axis_filter.hpp"
+
+class MinmaxAxisFilter : public AxisFilter
 {
-}
+public:
+  static MinmaxAxisFilter* from_string(const std::string& str);
+
+public:
+  MinmaxAxisFilter(int speed); /* JJ: speed not necessary */
+
+  void update(int msec_delta);
+  int filter(int value, int min, int max);
+  std::string str() const;
+
+private:
+  int m_speed; /* JJ: speed not necessary */
+
+  float m_float_speed; /* JJ: speed not necessary */
+  float m_value;
+  float m_state;
+};
+
+#endif
 
 /* EOF */
